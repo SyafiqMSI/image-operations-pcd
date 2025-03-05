@@ -152,8 +152,7 @@ def main():
             img1 = None
         
         if img1:
-            st.image(img1, caption="First Image Preview", use_column_width=True)
-    
+            st.image(img1, caption="First Image Preview", use_container_width=True)
     with col2:
         uploaded_img2 = st.file_uploader("Upload Second Image", type=['jpg', 'png', 'jpeg'])
         img2_url = None if uploaded_img2 else st.text_input("Or enter image URL for Second Image")
@@ -166,7 +165,7 @@ def main():
             img2 = None
         
         if img2:
-            st.image(img2, caption="Second Image Preview", use_column_width=True)
+            st.image(img2, caption="Second Image Preview", use_container_width=True)
     
     st.sidebar.header('Image Processing Filters')
     filter_options = [
@@ -187,7 +186,7 @@ def main():
             col_index = 0
             for option in selected_filters:
                 with result_cols[col_index]:
-                    st.image(processed_images[option], caption=option, use_column_width=True)
+                    st.image(processed_images[option], caption=option, use_container_width=True)
                 col_index = (col_index + 1) % 3
     else:
         st.warning('Please upload two images to process or enter image URLs')
