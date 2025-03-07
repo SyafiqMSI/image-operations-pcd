@@ -25,9 +25,25 @@ def bitwise_or(image1, image2):
 def bitwise_xor(image1, image2):
     return [[p1 ^ p2 for p1, p2 in zip(row1, row2)] for row1, row2 in zip(image1, image2)]
 
+def bitwise_xnor(image1, image2):
+    xor_result = bitwise_xor(image1, image2)
+    return bitwise_not(xor_result)
+
+def bitwise_nor(image1, image2):
+    or_result = bitwise_or(image1, image2)
+    return bitwise_not(or_result)
+
+def bitwise_nand(image1, image2):
+    and_result = bitwise_and(image1, image2)
+    return bitwise_not(and_result)
+
 def bitwise_and_not(image1, image2):
     not_image2 = bitwise_not(image2)
     return bitwise_and(image1, not_image2)
+
+def bitwise_and_not_reverse(image1, image2):
+    not_image1 = bitwise_not(image1)
+    return bitwise_and(image2, not_image1)
 
 def process_images(img1, img2):
     width, height = img1.size
@@ -44,10 +60,15 @@ def process_images(img1, img2):
         'Grayscale G1': np.array(img1_gray),
         'Grayscale G2': np.array(img2_gray),
         'NOT(G1)': np.array(bitwise_not(img1_2d)),
+        'NOT(G2)': np.array(bitwise_not(img2_2d)),
         'G1 AND G2': np.array(bitwise_and(img1_2d, img2_2d)),
         'G1 OR G2': np.array(bitwise_or(img1_2d, img2_2d)),
         'G1 AND NOT(G2)': np.array(bitwise_and_not(img1_2d, img2_2d)),
-        'G1 XOR G2': np.array(bitwise_xor(img1_2d, img2_2d))
+        'G2 AND NOT(G1)': np.array(bitwise_and_not_reverse(img1_2d, img2_2d)),
+        'G1 XOR G2': np.array(bitwise_xor(img1_2d, img2_2d)),
+        'XNOR/equivalence': np.array(bitwise_xnor(img1_2d, img2_2d)),
+        'NOR (NOT(G1 OR G2))': np.array(bitwise_nor(img1_2d, img2_2d)),
+        'NAND (NOT(G1 AND G2))': np.array(bitwise_nand(img1_2d, img2_2d))
     }
     return processed_images
 
@@ -171,9 +192,11 @@ def main():
     filter_options = [
         'G1 Original', 'G2 Original', 
         'Grayscale G1', 'Grayscale G2', 
-        'NOT(G1)', 'G1 AND G2', 
-        'G1 OR G2', 'G1 AND NOT(G2)', 
-        'G1 XOR G2'
+        'NOT(G1)', 'NOT(G2)', 
+        'G1 AND G2', 'G1 OR G2', 
+        'G1 AND NOT(G2)', 'G2 AND NOT(G1)', 
+        'G1 XOR G2', 'XNOR/equivalence', 
+        'NOR (NOT(G1 OR G2))', 'NAND (NOT(G1 AND G2))'
     ]
     selected_filters = st.sidebar.multiselect("Select Filters", filter_options, default=filter_options)
     
