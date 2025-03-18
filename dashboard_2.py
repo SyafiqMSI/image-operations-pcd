@@ -2,7 +2,18 @@ import streamlit as st
 import matplotlib.pyplot as plt
 from PIL import Image
 import numpy as np
-import requests 
+import io
+import requests
+from io import BytesIO
+
+def get_image_from_url(url):
+    try:
+        response = requests.get(url)
+        return Image.open(BytesIO(response.content))
+    except:
+        st.warning(f"Could not retrieve image from {url}")
+        return None
+
 
 def calculate_histogram(image):
     hist = np.zeros(256)
@@ -11,7 +22,6 @@ def calculate_histogram(image):
     return hist
 
 def cumulative_histogram(hist):
-    """Calculate cumulative histogram"""
     cum_hist = hist.copy()
     for i in range(1, 256):
         cum_hist[i] = cum_hist[i-1] + cum_hist[i]
@@ -98,3 +108,6 @@ def histogram_dashboard():
             ax.set_ylabel("Cumulative Frequency")
             ax.set_title("Cumulative Histogram")
             st.pyplot(fig)
+            
+if __name__ == "__main__":
+    histogram_dashboard()
