@@ -7,6 +7,8 @@ from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 import re
 import math
+from dashboard_2 import histogram_dashboard
+
 
 
 def read_grayscale_image(image):
@@ -235,10 +237,23 @@ def get_image_from_url(url):
     return None
 
 def main():
-    st.set_page_config(page_title="PCD Kelompok 2 Tugas 1", layout="wide")
+    st.set_page_config(page_title="PCD Kelompok 2", layout="wide")
+    
+    st.sidebar.title("Navigation")
+    app_mode = st.sidebar.selectbox(
+        "Tugas",
+        ["TUGAS 1 (IMAGE OPERATIONS)", "TUGAS 2 (HISTOGRAM)"]
+    )
+    
+    if app_mode == "TUGAS 1 (IMAGE OPERATIONS)":
+        image_operations_dashboard()
+    else:  
+        histogram_dashboard()
+
+def image_operations_dashboard():
     st.title('Image Processing')
     col1, col2 = st.columns(2)
-
+    
     with col1:
         uploaded_img1 = st.file_uploader("Upload First Image", type=['jpg', 'png', 'jpeg'])
         img1_url = None if uploaded_img1 else st.text_input("Or enter image URL for First Image")
