@@ -1,4 +1,0 @@
-Pillow
-requests
-beautifulsoup4
-matplotlib
