@@ -8,8 +8,7 @@ from urllib.parse import urljoin, urlparse
 import re
 import math
 from dashboard_2 import histogram_dashboard
-
-
+from dashboard_3 import edge_detection_dashboard
 
 def read_grayscale_image(image):
     return image.convert('L')
@@ -242,13 +241,15 @@ def main():
     st.sidebar.title("Navigation")
     app_mode = st.sidebar.selectbox(
         "Tugas",
-        ["TUGAS 1 (IMAGE OPERATIONS)", "TUGAS 2 (HISTOGRAM)"]
+        ["TUGAS 1 (IMAGE OPERATIONS)", "TUGAS 2 (HISTOGRAM)", "TUGAS 3 (EDGE DETECTION)"]
     )
     
     if app_mode == "TUGAS 1 (IMAGE OPERATIONS)":
         image_operations_dashboard()
-    else:  
+    if app_mode == "TUGAS 2 (HISTOGRAM)":
         histogram_dashboard()
+    else:
+        edge_detection_dashboard()
 
 def image_operations_dashboard():
     st.title('Image Processing')
