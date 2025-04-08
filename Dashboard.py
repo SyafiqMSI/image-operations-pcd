@@ -248,7 +248,7 @@ def main():
         image_operations_dashboard()
     if app_mode == "TUGAS 2 (HISTOGRAM)":
         histogram_dashboard()
-    else:
+    if app_mode == "TUGAS 3 (EDGE DETECTION)":
         edge_detection_dashboard()
 
 def image_operations_dashboard():
