@@ -300,9 +300,64 @@ def plot_rgb_histograms_comparison(original, processed, title_orig="Original", t
 
 def histogram_dashboard():
     st.title('Image Processing Dashboard')
-    
+    st.header("Upload Image")
     uploaded_img = st.file_uploader("Upload Image", type=['jpg', 'png', 'jpeg'])
     img_url = None if uploaded_img else st.text_input("Or enter image URL")
+        
+    with st.sidebar:
+       
+        st.header("Operations")
+        operations = st.multiselect(
+            "Choose one or more operations",
+            [
+                "RGB to Binary", "RGB to CMY", "RGB to HSI",
+                "Negative Transformation", "Log Transformation", "Gamma Transformation",
+                "Bit-plane Slicing","Contrast Stretching", "Intensity Level Slicing", 
+                "Local Histogram Processing", "Histogram Equalization", "Histogram Stretching"
+            ]
+        )
+
+        operation_params = {}
+        
+        if "RGB to Binary" in operations:
+            operation_params["threshold"] = st.slider("Binary Threshold", 0, 255, 128)
+            
+        if "Log Transformation" in operations:
+            operation_params["c"] = st.slider("Log Constant (c)", 1, 10, 1)
+            
+        if "Gamma Transformation" in operations:
+            operation_params["gamma"] = st.slider("Gamma Value", 0.1, 3.0, 1.0)
+            
+        if "Histogram Stretching" in operations:
+            st.subheader("RGB Histogram Stretching")
+            operation_params["auto_detect"] = st.checkbox("Auto-detect min/max values", value=True)
+            
+            if not operation_params["auto_detect"]:
+                col1, col2 = st.columns(2)
+                with col1:
+                    operation_params["r_min"] = st.slider("Red Min", 0, 255, 0)
+                    operation_params["g_min"] = st.slider("Green Min", 0, 255, 0)
+                    operation_params["b_min"] = st.slider("Blue Min", 0, 255, 0)
+                
+                with col2:
+                    operation_params["r_max"] = st.slider("Red Max", 0, 255, 255)
+                    operation_params["g_max"] = st.slider("Green Max", 0, 255, 255)
+                    operation_params["b_max"] = st.slider("Blue Max", 0, 255, 255)
+            
+        if "Bit-plane Slicing" in operations:
+            operation_params["bit"] = st.slider("Select Bit Plane (0-7)", 0, 7, 0)
+            
+        if "Contrast Stretching" in operations:
+            operation_params["min_val_contrast"] = st.slider("Min Intensity (Contrast)", 0, 255, 50)
+            operation_params["max_val_contrast"] = st.slider("Max Intensity (Contrast)", 0, 255, 200)
+            
+        if "Intensity Level Slicing" in operations:
+            operation_params["min_val_slice"] = st.slider("Min Intensity (Slice)", 0, 255, 100)
+            operation_params["max_val_slice"] = st.slider("Max Intensity (Slice)", 0, 255, 200)
+            operation_params["preserve_intensity"] = st.checkbox("Preserve Original Intensity", value=True)
+            
+        if "Local Histogram Processing" in operations:
+            operation_params["kernel_size"] = st.slider("Kernel Size", 3, 15, 3, step=2)
     
     if uploaded_img:
         img = Image.open(uploaded_img)
@@ -323,23 +378,11 @@ def histogram_dashboard():
         st.subheader("Original Image Histogram")
         st.pyplot(plot_histogram(img, "Original RGB Histogram"))
         
-        st.subheader("Select Operations")
-        operations = st.multiselect(
-            "Choose one or more operations",
-            [
-                "RGB to Binary", "RGB to CMY", "RGB to HSI",
-                "Negative Transformation", "Log Transformation", "Gamma Transformation",
-                "Bit-plane Slicing","Contrast Stretching", "Intensity Level Slicing", "Local Histogram Processing",
-                "Histogram Equalization", "Histogram Stretching"
-            ]
-        )
-
         processed_images = {}
         comparisons = []  
 
         if "RGB to Binary" in operations:
-            threshold = st.slider("Threshold", 0, 255, 128)
-            binary_img = rgb_to_binary(img, threshold)
+            binary_img = rgb_to_binary(img, operation_params["threshold"])
             processed_images["Binary Image"] = binary_img
 
         if "RGB to CMY" in operations:
@@ -358,14 +401,12 @@ def histogram_dashboard():
             comparisons.append(("RGB Channel Comparison: Original vs Negative Image", plot_rgb_histograms_comparison(img, neg_img, "Original", "Negative Image")))
 
         if "Log Transformation" in operations:
-            c = st.slider("Constant (c)", 1, 10, 1)
-            log_img = log_transform(img, c)
+            log_img = log_transform(img, operation_params["c"])
             processed_images["Log Transformed Image"] = log_img
             comparisons.append(("RGB Channel Comparison: Original vs Log Transformed Image", plot_rgb_histograms_comparison(img, log_img, "Original", "Log Transformed Image")))
 
         if "Gamma Transformation" in operations:
-            gamma = st.slider("Gamma Value", 0.1, 3.0, 1.0)
-            gamma_img = gamma_transform(img, gamma)
+            gamma_img = gamma_transform(img, operation_params["gamma"])
             processed_images["Gamma Corrected Image"] = gamma_img
             comparisons.append(("RGB Channel Comparison: Original vs Gamma Corrected Image", plot_rgb_histograms_comparison(img, gamma_img, "Original", "Gamma Corrected Image")))
 
@@ -375,54 +416,40 @@ def histogram_dashboard():
             comparisons.append(("RGB Channel Comparison: Original vs Equalized RGB Image", plot_rgb_histograms_comparison(img, equalized, "Original", "Equalized RGB Image")))
 
         if "Histogram Stretching" in operations:
-            st.subheader("RGB Histogram Stretching Controls")
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                r_min = st.slider("Red Channel Min", 0, 255, 0)
-                g_min = st.slider("Green Channel Min", 0, 255, 0)
-                b_min = st.slider("Blue Channel Min", 0, 255, 0)
-            
-            with col2:
-                r_max = st.slider("Red Channel Max", 0, 255, 255)
-                g_max = st.slider("Green Channel Max", 0, 255, 255)
-                b_max = st.slider("Blue Channel Max", 0, 255, 255)
-            
-            auto_detect = st.checkbox("Auto-detect channel min/max values", value=False)
-            
-            if auto_detect:
+            if operation_params["auto_detect"]:
                 stretched_img = histogram_stretching_rgb(img)
             else:
-                stretched_img = histogram_stretching_rgb(img, r_min, r_max, g_min, g_max, b_min, b_max)
+                stretched_img = histogram_stretching_rgb(
+                    img, 
+                    operation_params["r_min"], 
+                    operation_params["r_max"], 
+                    operation_params["g_min"], 
+                    operation_params["g_max"], 
+                    operation_params["b_min"], 
+                    operation_params["b_max"]
+                )
                 
             processed_images["Stretched RGB Image"] = stretched_img
             comparisons.append(("RGB Channel Comparison: Original vs Stretched RGB Image", plot_rgb_histograms_comparison(img, stretched_img, "Original", "Stretched RGB Image")))
 
         if "Bit-plane Slicing" in operations:
-            bit = st.slider("Select Bit Plane (0-7)", 0, 7, 0)
-            bit_img = bit_plane_slicing(img_gray, bit)
-            processed_images[f"Bit-plane {bit} Image"] = bit_img
-            comparisons.append((f"Histogram Comparison: Original vs Bit-plane {bit} Image", plot_histogram_comparison(img_gray, bit_img, "Original (Grayscale)", f"Bit-plane {bit} Image")))
+            bit_img = bit_plane_slicing(img_gray, operation_params["bit"])
+            processed_images[f"Bit-plane {operation_params['bit']} Image"] = bit_img
+            comparisons.append((f"Histogram Comparison: Original vs Bit-plane {operation_params['bit']} Image", plot_histogram_comparison(img_gray, bit_img, "Original (Grayscale)", f"Bit-plane {operation_params['bit']} Image")))
 
         if "Contrast Stretching" in operations:
-            min_val = st.slider("Minimum Intensity", 0, 255, 50)
-            max_val = st.slider("Maximum Intensity", 0, 255, 200)
             img_gray = img.convert("L") if img.mode != "L" else img_gray
-            contrast_img = contrast_stretching(img_gray, min_val, max_val)
+            contrast_img = contrast_stretching(img_gray, operation_params["min_val_contrast"], operation_params["max_val_contrast"])
             processed_images["Contrast Stretched Image"] = contrast_img
             comparisons.append(("Histogram Comparison: Original vs Contrast Stretched Image", plot_histogram_comparison(img_gray, contrast_img, "Original (Grayscale)", "Contrast Stretched Image")))
 
         if "Intensity Level Slicing" in operations:
-            min_val = st.slider("Minimum Intensity", 0, 255, 100)
-            max_val = st.slider("Maximum Intensity", 0, 255, 200)
-            preserve_intensity = st.checkbox("Preserve Original Intensity", value=True)
-            sliced_img = intensity_level_slicing(img_gray, min_val, max_val, preserve_intensity)
+            sliced_img = intensity_level_slicing(img_gray, operation_params["min_val_slice"], operation_params["max_val_slice"], operation_params["preserve_intensity"])
             processed_images["Intensity Level Sliced Image"] = sliced_img
             comparisons.append(("Histogram Comparison: Original vs Intensity Level Sliced Image", plot_histogram_comparison(img_gray, sliced_img, "Original (Grayscale)", "Intensity Level Sliced Image")))
 
         if "Local Histogram Processing" in operations:
-            kernel_size = st.slider("Kernel Size", 3, 15, 3, step=2)
-            local_hist_img = local_histogram_processing(img_gray, kernel_size)
+            local_hist_img = local_histogram_processing(img_gray, operation_params["kernel_size"])
             processed_images["Local Histogram Processed Image"] = local_hist_img
             comparisons.append(("Histogram Comparison: Original vs Local Histogram Processed Image", plot_histogram_comparison(img_gray, local_hist_img, "Original (Grayscale)", "Local Histogram Processed Image")))
 
@@ -440,7 +467,7 @@ def histogram_dashboard():
                 st.pyplot(plot)
 
 if __name__ == "__main__":
-    histogram_dashboard()     
+    histogram_dashboard()  
      
 #     def histogram_dashboard():
 #         st.title('Image Processing Dashboard')
