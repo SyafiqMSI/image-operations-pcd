@@ -44,9 +44,9 @@ def apply_prewitt_filter(image):
                            [-1, 0, 1], 
                            [-1, 0, 1]])
     
-    prewitt_y = np.array([[-1, -1, -1], 
+    prewitt_y = np.array([[1, 1, 1], 
                            [0, 0, 0], 
-                           [1, 1, 1]])
+                           [-1, -1, -1]])
     
     grad_x = ndimage.convolve(img_gray, prewitt_x)
     grad_y = ndimage.convolve(img_gray, prewitt_y)
