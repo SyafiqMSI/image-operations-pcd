@@ -126,12 +126,11 @@ def apply_log_filter(image, sigma=1.0):
     
     img_smooth = gaussian(img_gray, sigma=sigma)
     
-    laplacian = np.array([[0, 1, 0], 
-                           [1, -4, 1], 
-                           [0, 1, 0]])
+    laplacian = np.array([[0, -1, 0], 
+                          [-1, 4, -1], 
+                          [0, -1, 0]])
     
     edges = ndimage.convolve(img_smooth, laplacian)
-    
     edges = np.abs(edges)
     edges = (edges / edges.max() * 255).astype(np.uint8)
     
@@ -186,7 +185,7 @@ def edge_detection_dashboard():
         img_gray = img.convert('L')
 
         st.subheader("Original Image")
-        st.image(img, caption="Original Image", width=500)
+        st.image(img, caption="Original Image")
         
         processed_images = {}
         
@@ -215,7 +214,7 @@ def edge_detection_dashboard():
         
         for name, image in processed_images.items():
             st.subheader(name)
-            st.image(image, caption=name, width=500)
+            st.image(image, caption=name)
 
         if len(edge_operations) > 1:
             st.subheader("Comparison of Edge Detection Methods")
@@ -227,7 +226,7 @@ def edge_detection_dashboard():
                 cols = st.columns(min(num_methods, 3))
                 for i, method_name in enumerate(methods):
                     with cols[i % 3]:
-                        st.image(processed_images[method_name], caption=method_name, width=300)
+                        st.image(processed_images[method_name], caption=method_name)
 
 if __name__ == "__main__":
     edge_detection_dashboard()
